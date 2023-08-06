@@ -1,6 +1,11 @@
+import json
+
+from django.db.models import Q
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.views import generic
 
-from product.models import Variant
+from product.models import Variant, Product, ProductVariantPrice, ProductVariant
 
 
 class CreateProductView(generic.TemplateView):
@@ -12,3 +17,49 @@ class CreateProductView(generic.TemplateView):
         context['product'] = True
         context['variants'] = list(variants.all())
         return context
+
+
+def SearchView(request):
+    if request.method == 'POST':
+        args = request.POST
+        # title filter
+        product_object = Product.objects.filter(title__icontains=args.get("title"))
+        if product_object is None:
+            product_object = Product.objects.all()
+
+        # date filter
+        date = args.get('date')
+        print(date)
+        try:
+            product_object = product_object.filter(Q(created_at__date=date) | Q(updated_at__date=date))
+        except:
+            pass
+
+        # variant filter
+        variant_object = None
+        if not args.get('variant') == '--Select A Variant--':
+            variant_object = ProductVariant.objects.filter(variant_title=args.get("variant"))
+            variant_object = ProductVariantPrice.objects.filter(Q(product_variant_one=variant_object.first()) |
+                                                                Q(product_variant_two=variant_object.first()) |
+                                                                Q(product_variant_three=variant_object.first()))
+        if variant_object is None:
+            variant_object = ProductVariantPrice.objects.all()
+
+        # price filter
+        try:
+            low = float(args.get("price_from"))
+        except:
+            low = None
+        try:
+            high = float(args.get("price_to"))
+        except:
+            high = None
+        try:
+            price_object = variant_object.filter(price__gte=low, price__lte=high)
+            variant_object = price_object
+        except:
+            pass
+        return render(request, 'products/list.html', {'search': True,
+                                                      'product': product_object,
+                                                      'variant': ProductVariant.objects.all(),
+                                                      'productvariantprice': variant_object})

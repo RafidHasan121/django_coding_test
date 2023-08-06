@@ -10,15 +10,18 @@
 
 
     <div class="card">
-        <form action="" method="get" class="card-header">
+        <form action="/product/search/" method="post" class="card-header">
+            {% csrf_token %}
             <div class="form-row justify-content-between">
                 <div class="col-md-2">
                     <input type="text" name="title" placeholder="Product Title" class="form-control">
                 </div>
                 <div class="col-md-2">
                     <select name="variant" id="" class="form-control">
-                        <option selected disabled>--Select A Variant--</option>
-
+                        <option selected>--Select A Variant--</option>
+                        {% for each in variant %}
+                        <option>{{each.variant_title}}</option>
+                        {%endfor%}
                     </select>
                 </div>
 
@@ -61,7 +64,7 @@
                         <td>{{ each.description }}</td>
                         <td>
 
-                            <dl class="row mb-0" style="height: 80px; overflow: hidden" id={{each.id}}>
+                            <dl class="row mb-0 variant-class" style="height: 80px; overflow: hidden" id={{each.id}}>
                                 {% for i in productvariantprice %}
                                 {% if i.product == each %}
                                 <dt class="col-sm-3 pb-0">
@@ -75,7 +78,6 @@
                                 </dd>
                                 {%endif%}
                                 {%endfor%}
-
                             </dl>
                             <button onclick="$('#{{each.id}}').toggleClass('h-auto')" class="btn btn-sm btn-link">Show more
                             </button>
@@ -95,14 +97,14 @@
         </div>
 
         <div class="card-footer">
-            <div class="row justify-content-between">
-                <div class="col-md-6">
-                    <p>Showing 1 to 10 out of 100</p>
-                </div>
-                <div class="col-md-2">
+<!--            <div class="row justify-content-between">-->
+<!--                <div class="col-md-6">-->
+<!--                    <p>Showing 1 to 10 out of 100</p>-->
+<!--                </div>-->
+<!--                <div class="col-md-2">-->
 
-                </div>
-            </div>
+<!--                </div>-->
+<!--            </div>-->
         </div>
     </div>
 {% endblock %}

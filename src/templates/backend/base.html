@@ -75,7 +75,19 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"
         integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF"
         crossorigin="anonymous"></script>
-
+<script>
+    try {
+        let variant_class_name = document.querySelectorAll(".variant-class");
+        variant_class_name.forEach(element => {
+            let parentTr = element.closest("tr");
+            if (element.innerHTML.trim() === "") {
+                parentTr.style.display = "none";
+            } else {
+                parentTr.style.display = "table-row";
+            }
+        });
+    } catch (e){}
+</script>
 
 <script type="text/javascript" src="{% static '/js/chunk-vendors.js' %}"></script>
 <script type="text/javascript" src="{% static '/js/app.js' %}"></script>
