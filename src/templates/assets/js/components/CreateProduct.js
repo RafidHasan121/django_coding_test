@@ -84,139 +84,141 @@ const CreateProduct = (props) => {
     return (
         <div>
             <section>
-                <div className="row">
-                    <div className="col-md-6">
-                        <div className="card shadow mb-4">
-                            <div className="card-body">
-                                <div className="form-group">
-                                    <label htmlFor="">Product Name</label>
-                                    <input type="text" placeholder="Product Name" className="form-control"/>
+                <form method="post" action="/product/create-product/" encType="multipart/form-data">
+                    <div className="row">
+                        <div className="col-md-6">
+                            <div className="card shadow mb-4">
+                                <div className="card-body">
+                                    <div className="form-group">
+                                        <label htmlFor="">Product Name</label>
+                                        <input name="product_name" type="text" placeholder="Product Name" className="form-control"/>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="">Product SKU</label>
+                                        <input name="product_SKU" type="text" placeholder="Product SKU" className="form-control"/>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="">Description</label>
+                                        <textarea name="product_description" id="" cols="30" rows="4" className="form-control"></textarea>
+                                    </div>
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="">Product SKU</label>
-                                    <input type="text" placeholder="Product Name" className="form-control"/>
+                            </div>
+
+                            <div className="card shadow mb-4">
+                                <div
+                                    className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 className="m-0 font-weight-bold text-primary">Media</h6>
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor="">Description</label>
-                                    <textarea id="" cols="30" rows="4" className="form-control"></textarea>
+                                <div className="card-body border">
+                                    <Dropzone onDrop={acceptedFiles => console.log(acceptedFiles)}>
+                                        {({getRootProps, getInputProps}) => (
+                                            <section>
+                                                <div {...getRootProps()}>
+                                                    <input name="product_image" {...getInputProps()} />
+                                                    <p>Drag 'n' drop some files here, or click to select files</p>
+                                                </div>
+                                            </section>
+                                        )}
+                                    </Dropzone>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="card shadow mb-4">
-                            <div
-                                className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                <h6 className="m-0 font-weight-bold text-primary">Media</h6>
-                            </div>
-                            <div className="card-body border">
-                                <Dropzone onDrop={acceptedFiles => console.log(acceptedFiles)}>
-                                    {({getRootProps, getInputProps}) => (
-                                        <section>
-                                            <div {...getRootProps()}>
-                                                <input {...getInputProps()} />
-                                                <p>Drag 'n' drop some files here, or click to select files</p>
-                                            </div>
-                                        </section>
-                                    )}
-                                </Dropzone>
-                            </div>
-                        </div>
-                    </div>
+                        <div className="col-md-6">
+                            <div className="card shadow mb-4">
+                                <div
+                                    className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 className="m-0 font-weight-bold text-primary">Variants</h6>
+                                </div>
+                                <div className="card-body">
 
-                    <div className="col-md-6">
-                        <div className="card shadow mb-4">
-                            <div
-                                className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                <h6 className="m-0 font-weight-bold text-primary">Variants</h6>
-                            </div>
-                            <div className="card-body">
+                                    {
+                                        productVariants.map((element, index) => {
+                                            return (
+                                                <div className="row" key={index}>
+                                                    <div className="col-md-4">
+                                                        <div className="form-group">
+                                                            <label htmlFor="">Option</label>
+                                                            <select name="product_variants" className="form-control" defaultValue={element.option}>
+                                                                {
+                                                                    JSON.parse(props.variants.replaceAll("'", '"')).map((variant, index) => {
+                                                                        return (<option key={index}
+                                                                                        value={variant.id}>{variant.title}</option>)
+                                                                    })
+                                                                }
 
-                                {
-                                    productVariants.map((element, index) => {
-                                        return (
-                                            <div className="row" key={index}>
-                                                <div className="col-md-4">
-                                                    <div className="form-group">
-                                                        <label htmlFor="">Option</label>
-                                                        <select className="form-control" defaultValue={element.option}>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="col-md-8">
+                                                        <div className="form-group">
                                                             {
-                                                                JSON.parse(props.variants.replaceAll("'", '"')).map((variant, index) => {
-                                                                    return (<option key={index}
-                                                                                    value={variant.id}>{variant.title}</option>)
-                                                                })
+                                                                productVariants.length > 1
+                                                                    ? <label htmlFor="" className="float-right text-primary"
+                                                                             style={{marginTop: "-30px"}}
+                                                                             onClick={() => removeProductVariant(index)}>remove</label>
+                                                                    : ''
                                                             }
 
-                                                        </select>
+                                                            <section style={{marginTop: "30px"}}>
+                                                                <TagsInput value={element.tags}
+                                                                           style="margin-top:30px"
+                                                                           onChange={(value) => handleInputTagOnChange(value, index)}/>
+                                                            </section>
+
+                                                        </div>
                                                     </div>
                                                 </div>
-
-                                                <div className="col-md-8">
-                                                    <div className="form-group">
-                                                        {
-                                                            productVariants.length > 1
-                                                                ? <label htmlFor="" className="float-right text-primary"
-                                                                         style={{marginTop: "-30px"}}
-                                                                         onClick={() => removeProductVariant(index)}>remove</label>
-                                                                : ''
-                                                        }
-
-                                                        <section style={{marginTop: "30px"}}>
-                                                            <TagsInput value={element.tags}
-                                                                       style="margin-top:30px"
-                                                                       onChange={(value) => handleInputTagOnChange(value, index)}/>
-                                                        </section>
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )
-                                    })
-                                }
+                                            )
+                                        })
+                                    }
 
 
-                            </div>
-                            <div className="card-footer">
-                                {productVariants.length !== 3
-                                    ? <button className="btn btn-primary" onClick={handleAddClick}>Add another
-                                        option</button>
-                                    : ''
-                                }
+                                </div>
+                                <div className="card-footer">
+                                    {productVariants.length !== 3
+                                        ? <button className="btn btn-primary" onClick={handleAddClick}>Add another
+                                            option</button>
+                                        : ''
+                                    }
 
-                            </div>
+                                </div>
 
-                            <div className="card-header text-uppercase">Preview</div>
-                            <div className="card-body">
-                                <div className="table-responsive">
-                                    <table className="table">
-                                        <thead>
-                                        <tr>
-                                            <td>Variant</td>
-                                            <td>Price</td>
-                                            <td>Stock</td>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {
-                                            productVariantPrices.map((productVariantPrice, index) => {
-                                                return (
-                                                    <tr key={index}>
-                                                        <td>{productVariantPrice.title}</td>
-                                                        <td><input className="form-control" type="text"/></td>
-                                                        <td><input className="form-control" type="text"/></td>
-                                                    </tr>
-                                                )
-                                            })
-                                        }
-                                        </tbody>
-                                    </table>
+                                <div className="card-header text-uppercase">Preview</div>
+                                <div className="card-body">
+                                    <div className="table-responsive">
+                                        <table className="table">
+                                            <thead>
+                                            <tr>
+                                                <td>Variant</td>
+                                                <td>Price</td>
+                                                <td>Stock</td>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {
+                                                productVariantPrices.map((productVariantPrice, index) => {
+                                                    return (
+                                                        <tr key={index}>
+                                                            <td>{productVariantPrice.title}</td>
+                                                            <td><input className="form-control" type="text"/></td>
+                                                            <td><input className="form-control" type="text"/></td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            }
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <button type="button" onClick={saveProduct} className="btn btn-lg btn-primary">Save</button>
-                <button type="button" className="btn btn-secondary btn-lg">Cancel</button>
+                    <button type="submit" onClick={saveProduct} className="btn btn-lg btn-primary">Save</button>
+                    <button type="button" className="btn btn-secondary btn-lg">Cancel</button>
+                </form>
             </section>
         </div>
     );

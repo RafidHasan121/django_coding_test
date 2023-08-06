@@ -20,7 +20,11 @@
                     <select name="variant" id="" class="form-control">
                         <option selected>--Select A Variant--</option>
                         {% for each in variant %}
-                        <option>{{each.variant_title}}</option>
+                        <optgroup label="{{each.type}}">
+                        {% for data in each.value %}
+                            <option class="product-variant">{{data}}</option>
+                        {%endfor%}
+                        </optgroup>
                         {%endfor%}
                     </select>
                 </div>

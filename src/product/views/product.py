@@ -59,7 +59,36 @@ def SearchView(request):
             variant_object = price_object
         except:
             pass
+        variant_data = product_variant_data()
         return render(request, 'products/list.html', {'search': True,
                                                       'product': product_object,
-                                                      'variant': ProductVariant.objects.all(),
+                                                      'variant': variant_data,
                                                       'productvariantprice': variant_object})
+
+
+def product_variant_data():
+    data = ProductVariant.objects.all()
+    formatted_data = []
+    grouped_data = {}
+
+    for item in data:
+        variant_title = item.variant.title
+        if variant_title not in grouped_data:
+            grouped_data[variant_title] = set()
+        grouped_data[variant_title].add(item.variant_title)
+
+    for variant_title, variant_values in grouped_data.items():
+        formatted_data.append({
+            "type": variant_title,
+            "value": list(variant_values)
+        })
+
+    return formatted_data
+
+
+
+def createView(request):
+    if request.method == 'POST':
+        name = request.POST["product_name"]
+        print(name)
+        return HttpResponseRedirect('/')
