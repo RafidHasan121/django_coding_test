@@ -1,12 +1,12 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
 import Dropzone from 'react-dropzone'
 
-
 const CreateProduct = (props) => {
 
     const [productVariantPrices, setProductVariantPrices] = useState([])
+
 
     const [productVariants, setProductVariant] = useState([
         {
@@ -31,7 +31,6 @@ const CreateProduct = (props) => {
         let product_variants = [...productVariants]
         product_variants[index].tags = value
         setProductVariant(product_variants)
-
         checkVariant()
     }
 
@@ -73,33 +72,94 @@ const CreateProduct = (props) => {
         }, []);
         return ans;
     }
+    const handleOptionChange = (event, index) => {
+    const { value } = event.target;
+    setProductVariant((prevVariants) => {
+      const updatedVariants = [...prevVariants];
+      updatedVariants[index] = { ...updatedVariants[index], option: value };
+      return updatedVariants;
+    });
+  };
 
+    // const [csrfToken, setCsrfToken] = useState('');
+    // useEffect(() => {
+    //     const fetchCsrfToken = async () => {
+    //       try {
+    //         const response = await fetch('/product/get-csrf-token/'); // Replace with the actual URL of your Django view
+    //         const data = await response.json();
+    //         setCsrfToken(data.csrfToken);
+    //       } catch (error) {
+    //         console.error('Error fetching CSRF token:', error);
+    //       }
+    //     };
+    //
+    //     fetchCsrfToken();
+    // }, []);
     // Save product
-    let saveProduct = (event) => {
+    let saveProduct = async (event) => {
         event.preventDefault();
-        // TODO : write your code here to save the product
-    }
+
+        const response = await fetch('/product/get-csrf-token/'); // Replace with the actual URL of your Django view
+        const data = await response.json();
+        const csrfToken = data.csrfToken;
+
+        let productName = document.querySelector('input[placeholder="Product Name"]').value;
+        let productSKU = document.querySelector('input[placeholder="Product SKU"]').value;
+        let productDescription = document.querySelector('textarea').value;
+        let fileInput = document.querySelector('input[type="file"]');
+        let mediaFile = fileInput.files[0];
+
+        // let selectedOptions = productVariants.map((variant) => variant.option);
+        // let tagInputValues = productVariants.map((variant) => variant.tags);
+
+
+        let formData = new FormData();
+        formData.append('productName', productName);
+        formData.append('productSKU', productSKU);
+        formData.append('productDescription', productDescription);
+        formData.append('mediaFile', mediaFile);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        // formData.append('selectedOptions', selectedOptions);
+
+        try {
+            let response = await fetch('/product/create-product/', {
+                method: 'POST',
+                headers: {
+                //     'Content-Type': 'application/json',
+                },
+                body: formData,
+            });
+
+            if (response.ok) {
+                console.log('Product saved successfully!');
+            } else {
+                console.log('Failed to save the product.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
 
 
     return (
         <div>
             <section>
-                <form method="post" action="/product/create-product/" encType="multipart/form-data">
                     <div className="row">
                         <div className="col-md-6">
                             <div className="card shadow mb-4">
                                 <div className="card-body">
                                     <div className="form-group">
                                         <label htmlFor="">Product Name</label>
-                                        <input name="product_name" type="text" placeholder="Product Name" className="form-control"/>
+                                        <input type="text" placeholder="Product Name" className="form-control"/>
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor="">Product SKU</label>
-                                        <input name="product_SKU" type="text" placeholder="Product SKU" className="form-control"/>
+                                        <input type="text" placeholder="Product SKU" className="form-control"/>
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor="">Description</label>
-                                        <textarea name="product_description" id="" cols="30" rows="4" className="form-control"></textarea>
+                                        <textarea id="" cols="30" rows="4" className="form-control"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -114,7 +174,7 @@ const CreateProduct = (props) => {
                                         {({getRootProps, getInputProps}) => (
                                             <section>
                                                 <div {...getRootProps()}>
-                                                    <input name="product_image" {...getInputProps()} />
+                                                    <input {...getInputProps()} />
                                                     <p>Drag 'n' drop some files here, or click to select files</p>
                                                 </div>
                                             </section>
@@ -139,11 +199,11 @@ const CreateProduct = (props) => {
                                                     <div className="col-md-4">
                                                         <div className="form-group">
                                                             <label htmlFor="">Option</label>
-                                                            <select name="product_variants" className="form-control" defaultValue={element.option}>
+                                                            <select className="form-control" value={element.option} onChange={(event) => handleOptionChange(event, index)}>
                                                                 {
                                                                     JSON.parse(props.variants.replaceAll("'", '"')).map((variant, index) => {
                                                                         return (<option key={index}
-                                                                                        value={variant.id}>{variant.title}</option>)
+                                                                                        value={variant.title}>{variant.title}</option>)
                                                                     })
                                                                 }
 
@@ -216,9 +276,8 @@ const CreateProduct = (props) => {
                         </div>
                     </div>
 
-                    <button type="submit" onClick={saveProduct} className="btn btn-lg btn-primary">Save</button>
+                    <button type="button" onClick={saveProduct} className="btn btn-lg btn-primary">Save</button>
                     <button type="button" className="btn btn-secondary btn-lg">Cancel</button>
-                </form>
             </section>
         </div>
     );

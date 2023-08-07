@@ -1,11 +1,13 @@
 import json
 
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import generic
-
-from product.models import Variant, Product, ProductVariantPrice, ProductVariant
+from django.http import JsonResponse
+from product.models import Variant, Product, ProductVariantPrice, ProductVariant, ProductImage
 
 
 class CreateProductView(generic.TemplateView):
@@ -86,9 +88,19 @@ def product_variant_data():
     return formatted_data
 
 
-
 def createView(request):
     if request.method == 'POST':
-        name = request.POST["product_name"]
-        print(name)
+        name = request.POST["productName"]
+        sku = request.POST["productSKU"]
+        description = request.POST["productDescription"]
+        image = request.FILES["mediaFile"]
+        file_name = default_storage.get_available_name(image.name)
+        file_path = default_storage.save(file_name, ContentFile(image.read()))
+        file_url = default_storage.url(file_path)
+        product_object = Product.objects.create(title=name, sku=sku, description=description)
+        product_image_object = ProductImage.objects.create(product=product_object, file_path=file_url)
         return HttpResponseRedirect('/')
+
+
+def get_csrf_token(request):
+    return JsonResponse({'csrfToken': request.COOKIES['csrftoken']})

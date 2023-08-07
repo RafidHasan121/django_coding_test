@@ -4,7 +4,7 @@ from .models import Product, ProductVariantPrice, ProductVariant
 from product.views.product import CreateProductView
 from product.views.variant import VariantView, VariantCreateView, VariantEditView
 
-from .views.product import SearchView, product_variant_data, createView
+from .views.product import SearchView, product_variant_data, createView, get_csrf_token
 
 app_name = "product"
 
@@ -24,4 +24,5 @@ urlpatterns = [
     }), name='list.product'),
     path('search/', SearchView),
     path('create-product/', createView),
+    path('get-csrf-token/', get_csrf_token),
 ]
